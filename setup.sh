@@ -18,10 +18,6 @@ ISO_FILE_PATH="$(ls ~/Downloads/ubuntu-*-server-arm64.iso | head -n 1)"
 HOST_SSH_PORT=2200
 # The username use to login, make sure it matched the user you created
 SSH_USERNAME="ubuntu"
-# The port forwading parameters pass to ssh, depend on your application inside docker
-# for example, -L 127.0.0.1:8000:127.0.0.1:80 will forward guest 80 to host 8000
-# if you want to change it later, you can modify $QEMU_IMAGE_DIR/startup.sh
-PORT_FORWARD_PARAMS="-L 127.0.0.1:3000:127.0.0.1:3000 -L 127.0.0.1:5000:127.0.0.1:5000 -L 127.0.0.1:1080:127.0.0.1:1080"
 
 create () {
     echo "create qemu image..."
@@ -32,9 +28,8 @@ create () {
     echo "create startup script..."
     cat << EOF > "${QEMU_IMAGE_DIR}/startup.sh"
 #!/bin/sh
-echo "start qemu instance..."
 if [[ "\$(pgrep -f 'file=${QEMU_IMAGE_DIR}/image.qcow2')" = "" ]]; then
-  qemu-system-aarch64 \\
+  nohup qemu-system-aarch64 \\
     -machine virt,accel=hvf,highmem=off \\
     -cpu cortex-a72 -smp ${QEMU_CPUS} -m ${QEMU_MEMORY} \\
     -device qemu-xhci,id=usb-bus \\
@@ -46,18 +41,93 @@ if [[ "\$(pgrep -f 'file=${QEMU_IMAGE_DIR}/image.qcow2')" = "" ]]; then
     -nic "user,model=virtio,hostfwd=tcp:127.0.0.1:${HOST_SSH_PORT}-0.0.0.0:22,smb=${QEMU_SHARE_FOLDER}" \\
     -drive "format=raw,file=/opt/homebrew/share/qemu/edk2-aarch64-code.fd,if=pflash,readonly=on" \\
     -drive "format=raw,file=${QEMU_IMAGE_DIR}/ovmf_vars.fd,if=pflash" \\
-    -drive "format=qcow2,file=${QEMU_IMAGE_DIR}/image.qcow2" &
-    echo "instance started"
+    -drive "format=qcow2,file=${QEMU_IMAGE_DIR}/image.qcow2" > /dev/null 2> /dev/null &
+    echo "qemu instance started"
 else
-    echo "instance already started"
+    echo "qemu instance already started"
 fi
-pkill sh \$0
-echo "setup port forwading..."
-while true; do
-  # you can change the port forwading parameters here
-  ssh ${PORT_FORWARD_PARAMS} -N -p ${HOST_SSH_PORT} ${SSH_USERNAME}@127.0.0.1
-  sleep 5
-done
+if [[ "\$(pgrep -f '${QEMU_IMAGE_DIR}/port_forward.py')" = "" ]]; then
+    nohup python3 "${QEMU_IMAGE_DIR}/port_forward.py" > /dev/null 2> /dev/null &
+    echo "port forwader started"
+else
+    echo "port forwader already started"
+fi
+EOF
+
+    echo "create port forwarder..."
+    cat << EOF > "${QEMU_IMAGE_DIR}/port_forward.py"
+#!/usr/bin/env python3
+import subprocess
+import sys
+import os
+import time
+import traceback
+
+SSHPort = "${HOST_SSH_PORT}"
+Username = "${SSH_USERNAME}"
+IgnorePorts = [22, 53]
+ProcessMap = {}
+
+old_print = print
+log_openmode = "w"
+def print(*args):
+    global log_openmode
+    old_print(*args)
+    log_path = os.path.join(os.path.dirname(sys.argv[0]), "port_forward.log")
+    with open(log_path, log_openmode) as f:
+        f.write(" ".join(map(str, args)) + "\n")
+    log_openmode = "a"
+
+def get_listen_ports():
+    p = subprocess.run(["ssh", "-p", SSHPort, f"{Username}@127.0.0.1", "cat /proc/net/tcp"], capture_output=True)
+    if p.returncode != 0:
+        print("get_listen_ports error:", p.stderr.decode().strip())
+        return None
+    out = p.stdout.decode().strip()
+    ports = []
+    for line in out.split("\n")[1:]:
+        parts = line.split()
+        if len(parts) < 5 or parts[3] != "0A":
+            continue
+        port = int(parts[1].split(":")[1], 16)
+        if port not in IgnorePorts:
+            ports.append(port)
+    return ports
+
+def main():
+    while True:
+        ports = get_listen_ports()
+        if ports is None:
+            time.sleep(5)
+            continue
+        remove_ports = [p for p in ProcessMap.keys() if p not in ports]
+        for port in remove_ports:
+            print("remove port:", port)
+            ProcessMap.pop(port).kill()
+        for port in ports:
+            proc = ProcessMap.get(port)
+            if proc is not None:
+                returncode = proc.poll()
+                if returncode is None:
+                    continue
+                print("forward process exited:", proc.stdout.read().strip())
+                proc = None
+            if proc is None:
+                print("forward port:", port)
+                proc = subprocess.Popen(
+                    ["ssh", "-L", f"127.0.0.1:{port}:127.0.0.1:{port}", "-Np", SSHPort, f"{Username}@127.0.0.1"],
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+                ProcessMap[port] = proc
+        time.sleep(5)
+
+if __name__ == "__main__":
+    print("port forwarder started:", time.ctime())
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print("main error:", repr(e))
+            time.sleep(5)
 EOF
 
     echo "start instance with iso image..."

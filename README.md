@@ -9,7 +9,7 @@ After setup, you can use docker on Mac without Docker Desktop.
 │   QEMU Instance    │     │   Mac M1 Host     │
 │   Ubuntu Server    │     │                   │
 │                    │     │                   │
-│                 port forward                 │
+│              auto port forward               │
 │   ssh server◄──────┬─────┬───ssh client      │
 │                    │     │                   │
 │ ┌►dockerd          │     │                   │
@@ -69,7 +69,7 @@ Now you're ready to create and configure the qemu instance.
 
 First, download ubuntu server from the [offical download page](https://ubuntu.com/download/server/arm), and save the iso file to `Downloads` folder, you should download the LTS version (20.04 is tested).
 
-Second, edit `setup.sh` and check the parameters on the top of the script, usually you will want to change `PORT_FORWARD_PARAMS` but you can modify it later from `~/.qemu/ubuntu/startup.sh`.
+Second, edit `setup.sh` and check the parameters on the top of the script, usually you don't have to modify them.
 
 Now you can run this command to create qemu instance, you will need to install the system yourself and prepare ssh login before continue.
 
@@ -140,8 +140,7 @@ Close qemu window when you see the boot screen, now you created the qemu instanc
 Before continue to configure, you need to setup ssh login, `sh startup.sh create` should give you the instruction like:
 
 ``` text
-# start qemu instance
-# notice it will blocking for port forwarding, you should open a new tab to enter the following commands
+# start qemu instance and port forwader
 sh ~/.qemu/ubuntu/startup.sh
 
 # generate ssh key, if you already have one please skip
@@ -187,7 +186,7 @@ You will find an application name `Ubuntu` from Applications, click to to start 
 
 ## Memo
 
-QEMU's bulit-in port forwarding will reject connection if connect too often, so this setup use ssh for port forwarding, the port forwarding parameters can be found in `~/.qemu/ubuntu/startup.sh`.
+QEMU's bulit-in port forwarding will reject connection if connect too often, and it can't be changed while instance running. This setup provide a automatic port forwader that will detect listening ports and forward them to host automatically. You can check `~/.qemu/ubuntu/port_forward.log` to find out which ports are forwarded.
 
 Running x86 image is possible (docker will use qemu-user-static), but some image are not compatiable because qemu-user-static doesn't support multi threading, for example, `mailcatcher` only provides `linux/amd64` on docker hub and it can't be run directly on this setup. But you can build `mailcatcher` image with aarch64 yourself, for example:
 
