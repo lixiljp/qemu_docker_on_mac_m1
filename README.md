@@ -202,6 +202,12 @@ Share `/Users/YourUsername` to the qemu instance maybe "insecure" if you want to
 
 Samba doesn't support symlink, if you use `npm install` under share folder it will fail, you can pass `--no-bin-links` to npm install, or you can use volume for `node_modules` (recommended). File locking also won't work, if you want the application use a presistent sqlite db, you need to use volume to store the sqlite db file.
 
+File change notification does not work for share folder, if you want your application reload automatically when file changed inside share folder, you need to enable pooling support, for example:
+
+- nodemon: use `nodemon -L app.js`
+- nuxtjs: set `watchers` property in `nuxt.config.js`, see [here](https://nuxtjs.org/docs/configuration-glossary/configuration-watchers) and [here](https://github.com/paulmillr/chokidar#api)
+- flask: pooling is enabled by default
+
 ## License
 
 Scripts inside this repository are under the MIT License, free to modify and redistribute.
