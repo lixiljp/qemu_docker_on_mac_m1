@@ -219,7 +219,7 @@ def main():
     args = sys.argv[1:]
     cmd = f"ssh -p '${HOST_SSH_PORT}' '${SSH_USERNAME}@127.0.0.1' -qt \"cd {pipes.quote(workdir)} && {pipes.quote(filename)} {' '.join(map(pipes.quote, args))}\""
     # print(cmd)
-    os.system(cmd)
+    exit(os.system(cmd) >> 8)
 
 if __name__ == "__main__":
     main()
