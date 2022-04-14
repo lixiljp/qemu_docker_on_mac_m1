@@ -34,7 +34,7 @@ After setup, you can use docker on Mac without Docker Desktop.
 
 ### UTM
 
-[UTM](https://github.com/utmapp/UTM) provides a good gui for setup qemu machine, but there is a [ultra bug](https://github.com/utmapp/UTM/issues/3094) which breaks networking if you enable full graphics, but if you disable full graphics with UTM you can't use it's file sharing protocol (which based on SPICE WebDAV).
+[UTM](https://github.com/utmapp/UTM) provides a good gui for setup qemu machine, ~~but there is a [ultra bug](https://github.com/utmapp/UTM/issues/3094) which breaks networking if you enable full graphics, and if you disable full graphics with UTM you can't use it's file sharing protocol (which based on SPICE WebDAV)~~, they found a solution for the network unavailable bug, see [this link](https://mac.getutm.app/gallery/ubuntu-20-04#networking-is-unavailable-after-switching-between-console-only-and-full-graphics-modes), for now UTM should able to setup a Linux virtual machine with port forward and file sharing support, you could use UTM instead of this repository if you are familiar with Linux CLI.
 
 ## Preparation
 
@@ -162,7 +162,7 @@ sudo systemctl restart ssh
 
 ![fix_ssh_server](./img/fix_ssh_server.png)
 
-After you can connect the qemu instance with ssh, you can continue to the configure step.
+Once you can connect the qemu instance with ssh, you can continue to the configure step.
 
 ## Configure QEMU Instance
 
