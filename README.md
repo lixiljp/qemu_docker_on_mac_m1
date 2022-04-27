@@ -67,7 +67,7 @@ Now you're ready to create and configure the qemu instance.
 
 ## Create QEMU Instance
 
-First, download ubuntu server from the [offical download page](https://ubuntu.com/download/server/arm), and save the iso file to `Downloads` folder, you should download the LTS version (20.04 is tested).
+First, download ubuntu server from the [offical download page](https://ubuntu.com/download/server/arm), and save the iso file to `Downloads` folder, you should download the LTS version (20.04 and 22.04 is tested).
 
 Second, edit `setup.sh` and check the parameters on the top of the script, usually you don't have to modify them.
 
@@ -90,6 +90,10 @@ Usually you will select `English`, because mostly you won't find any useful info
 Choose the keyboard layout you used.
 
 ![03](./img/03.png)
+
+Keep `Ubuntu Server` selected and press `Done`.
+
+![03_2](./img/03_2.png)
 
 Press `Done`.
 
@@ -133,7 +137,7 @@ Press `Reboot Now` after installation completed.
 
 ![13](./img/13.png)
 
-Close qemu window when you see the boot screen, now you created the qemu instance.
+Close qemu window when you see the boot screen, now you have created the qemu instance.
 
 ## Setup SSH Login
 
@@ -186,7 +190,19 @@ You will find an application name `Ubuntu` from Applications, click to to start 
 
 ## Memo
 
+### Connect to qemu instance via ssh
+
+Here is the command by default (if you not changed the port number):
+
+``` text
+ssh -p 2200 ubuntu@127.0.0.1
+```
+
+### Port forwading
+
 QEMU's bulit-in port forwarding will reject connection if connect too often, and it can't be changed while instance running. This setup provide a automatic port forwader that will detect listening ports and forward them to host automatically. You can check `~/.qemu/ubuntu/port_forward.log` to find out which ports are forwarded.
+
+### Running x86 image
 
 Running x86 image is possible (docker will use qemu-user-static), but some image are not compatiable because qemu-user-static doesn't support multi threading, for example, `mailcatcher` only provides `linux/amd64` on docker hub and it can't be run directly on this setup. But you can build `mailcatcher` image with aarch64 yourself, for example:
 
@@ -196,17 +212,26 @@ cd mailcatcher
 docker build -t schickling/mailcatcher:latest
 ```
 
+### Share folder
+
 By default, the share folder path is `/Users/YourUsername`, the qemu instance will use exactly same path to ensure docker and docker-compose can read files without path mapping, but that also mean docker and docker-compose can't access files outside of `/Users/YourUsername`, for example, if you checkout a repository to `/tmp` and trying to use docker inside `/tmp/RepositoryName`, it won't work.
 
 Share `/Users/YourUsername` to the qemu instance maybe "insecure" if you want to run untrusted application inside it, you can modify the path in `~/.qemu/ubuntu/startup.sh` to something like `/Users/YourUsername/Projects`, you will also need to modify `/etc/fstab` inside the qemu instance.
 
 Samba doesn't support symlink, if you use `npm install` under share folder it will fail, you can pass `--no-bin-links` to npm install, or you can use volume for `node_modules` (recommended). File locking also won't work, if you want the application use a presistent sqlite db, you need to use volume to store the sqlite db file.
 
+### File change notification
+
 File change notification does not work for share folder, if you want your application reload automatically when file changed inside share folder, you need to enable pooling support, for example:
 
 - nodemon: use `nodemon -L app.js`
 - nuxtjs: set `watchers` property in `nuxt.config.js`, see [here](https://nuxtjs.org/docs/configuration-glossary/configuration-watchers) and [here](https://github.com/paulmillr/chokidar#api)
 - flask: pooling is enabled by default
+
+### Troubleshooting
+
+- Stuck at EFI screen after upgraded kernel:
+    - Kernel newer than `5.4.0-100` is not able to boot on qemu 6.1.0, please upgrade to qemu 6.2.0
 
 ## License
 

@@ -151,8 +151,7 @@ EOF
     echo "setup completed, please setup ssh login before execute configure command"
     echo "for example:"
     echo
-    echo "# start qemu instance"
-    echo "# notice it will blocking for port forwarding, you should open a new tab to enter the following commands"
+    echo "# start qemu instance and port forwader"
     echo "sh ${QEMU_IMAGE_DIR}/startup.sh"
     echo
     echo "# generate ssh key, if you already have one please skip"
