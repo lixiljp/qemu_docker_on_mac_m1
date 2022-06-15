@@ -30,8 +30,8 @@ create () {
 #!/bin/sh
 if [[ "\$(pgrep -f 'file=${QEMU_IMAGE_DIR}/image.qcow2')" = "" ]]; then
   nohup qemu-system-aarch64 \\
-    -machine virt,accel=hvf,highmem=off \\
-    -cpu cortex-a72 -smp ${QEMU_CPUS} -m ${QEMU_MEMORY} \\
+    -machine virt,accel=hvf,highmem=on \\
+    -cpu host -smp ${QEMU_CPUS} -m ${QEMU_MEMORY} \\
     -device qemu-xhci,id=usb-bus \\
     -device usb-tablet,bus=usb-bus.0 \\
     -device usb-mouse,bus=usb-bus.0 \\
@@ -134,8 +134,8 @@ EOF
     echo "NOTICE: you need to install the system yourself and enable openssh server"
     echo "NOTICE: you must create a user named ${SSH_USERNAME} for ssh login"
     qemu-system-aarch64 \
-      -machine virt,accel=hvf,highmem=off \
-      -cpu cortex-a72 -smp ${QEMU_CPUS} -m ${QEMU_MEMORY} \
+      -machine virt,accel=hvf,highmem=on \
+      -cpu host -smp ${QEMU_CPUS} -m ${QEMU_MEMORY} \
       -device qemu-xhci,id=usb-bus \
       -device usb-tablet,bus=usb-bus.0 \
       -device usb-mouse,bus=usb-bus.0 \

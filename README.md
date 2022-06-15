@@ -36,6 +36,13 @@ After setup, you can use docker on Mac without Docker Desktop.
 
 [UTM](https://github.com/utmapp/UTM) provides a good gui for setup qemu machine, ~~but there is a [ultra bug](https://github.com/utmapp/UTM/issues/3094) which breaks networking if you enable full graphics, and if you disable full graphics with UTM you can't use it's file sharing protocol (which based on SPICE WebDAV)~~, they found a solution for the network unavailable bug, see [this link](https://mac.getutm.app/gallery/ubuntu-20-04#networking-is-unavailable-after-switching-between-console-only-and-full-graphics-modes), for now UTM should able to setup a Linux virtual machine with port forward and file sharing support, you could use UTM instead of this repository if you are familiar with Linux CLI.
 
+## Requirement
+
+This project required following conditions:
+
+- macOS >= 12.4.0 (Monterey)
+- qemu >= 7.0.0
+
 ## Preparation
 
 Before setup the qemu environment, you need to uninstall Docker Desktop and install qemu from homebrew.
@@ -227,11 +234,6 @@ File change notification does not work for share folder, if you want your applic
 - nodemon: use `nodemon -L app.js`
 - nuxtjs: set `watchers` property in `nuxt.config.js`, see [here](https://nuxtjs.org/docs/configuration-glossary/configuration-watchers) and [here](https://github.com/paulmillr/chokidar#api)
 - flask: pooling is enabled by default
-
-### Troubleshooting
-
-- Stuck at EFI screen after upgraded kernel:
-    - Kernel newer than `5.4.0-100` is not able to boot on qemu 6.1.0, please upgrade to qemu 6.2.0
 
 ## License
 
