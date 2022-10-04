@@ -39,7 +39,7 @@ if [[ "\$(pgrep -f 'file=${QEMU_IMAGE_DIR}/image.qcow2')" = "" ]]; then
     -device virtio-gpu-pci \\
     -display default,show-cursor=on \\
     -nic "user,model=virtio,hostfwd=tcp:127.0.0.1:${HOST_SSH_PORT}-0.0.0.0:22,smb=${QEMU_SHARE_FOLDER}" \\
-    -drive "format=raw,file=/opt/homebrew/share/qemu/edk2-aarch64-code.fd,if=pflash,readonly=on" \\
+    -drive "format=raw,file=\$(brew ls --verbose qemu | grep edk2-aarch64-code.fd),if=pflash,readonly=on" \\
     -drive "format=raw,file=${QEMU_IMAGE_DIR}/ovmf_vars.fd,if=pflash" \\
     -drive "format=qcow2,file=${QEMU_IMAGE_DIR}/image.qcow2" > /dev/null 2> /dev/null &
     echo "qemu instance started"
@@ -143,7 +143,7 @@ EOF
       -device virtio-gpu-pci \
       -display default,show-cursor=on \
       -nic user,model=virtio \
-      -drive "format=raw,file=/opt/homebrew/share/qemu/edk2-aarch64-code.fd,if=pflash,readonly=on" \
+      -drive "format=raw,file=$(brew ls --verbose qemu | grep edk2-aarch64-code.fd),if=pflash,readonly=on" \
       -drive "format=raw,file=${QEMU_IMAGE_DIR}/ovmf_vars.fd,if=pflash" \
       -drive "format=qcow2,file=${QEMU_IMAGE_DIR}/image.qcow2" \
       -cdrom "${ISO_FILE_PATH}"
