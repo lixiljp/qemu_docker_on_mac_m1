@@ -65,9 +65,8 @@ sh remove_docker_desktop.sh
 The next step is install qemu and samba from Homebrew, you need to [install Homebrew](https://brew.sh) first:
 
 ``` text
-brew install qemu
-# for qemu's file sharing support
-brew install samba
+brew install lixiljp/saml2aws/qemu
+brew install lixiljp/saml2aws/samba
 ```
 
 Now you're ready to create and configure the qemu instance.
@@ -234,6 +233,22 @@ File change notification does not work for share folder, if you want your applic
 - nodemon: use `nodemon -L app.js`
 - nuxtjs: set `watchers` property in `nuxt.config.js`, see [here](https://nuxtjs.org/docs/configuration-glossary/configuration-watchers) and [here](https://github.com/paulmillr/chokidar#api)
 - flask: pooling is enabled by default
+
+### Invalid accelerator hvf issue
+
+If you saw `invalid accelerator hvf` error, it may due to you installed x86 version of qemu. Check `which qemu-system-aarch64` output, it should point to `/opt/homebrew/bin/qemu-system-aarch64`, if it's under `/usr/local/bin` then you have x86 version installed. To fix this issue you need to:
+
+- Uninstall qemu: `brew uninstall qemu`
+- Uninstall homebrew x86: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"`
+- Uncheck `Open using rosetta` for `Terminal` application
+- Quit and run `Terminal` again, ensure it's under arm64 mode: `uname -m`
+- Install homebrew arm64: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"`
+- Install qemu again: `brew install lixiljp/saml2aws/qemu`
+- Check is hvf available: `qemu-system-aarch64 -accel help`
+
+### Not able to write file under share folder
+
+If you saw `Premission denied` when writing files under share folder, but you can read the files, then it should be the bug from new version of samba (>= 4.17.0). The temporary solution is install older version of samba: `brew uninstall samba && brew install lixiljp/saml2aws/samba`.
 
 ## License
 
