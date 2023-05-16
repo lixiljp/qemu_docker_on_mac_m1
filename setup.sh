@@ -199,7 +199,7 @@ configure () {
       sudo systemctl start docker &&
       sudo groupadd docker || true &&
       sudo usermod -aG docker \$USER &&
-      sudo curl -L \"https://github.com/docker/compose/releases/download/v2.0.1/docker-compose-linux-\$(uname -m)\" -o /usr/local/bin/docker-compose &&
+      echo -e '#!/bin/sh\\ndocker compose \"\$@\"' | sudo tee /usr/local/bin/docker-compose > /dev/null &&
       sudo chmod +x /usr/local/bin/docker-compose"
 
     echo "test docker commands..."
@@ -210,13 +210,13 @@ configure () {
 #!/usr/bin/env python3
 import sys
 import os
-import pipes
+import shlex
 
 def main():
     workdir = os.getcwd()
     filename = os.path.basename(sys.argv[0])
     args = sys.argv[1:]
-    cmd = f"ssh -p '${HOST_SSH_PORT}' '${SSH_USERNAME}@127.0.0.1' -qt \"cd {pipes.quote(workdir)} && {pipes.quote(filename)} {' '.join(map(pipes.quote, args))}\""
+    cmd = f"ssh -p '${HOST_SSH_PORT}' '${SSH_USERNAME}@127.0.0.1' -qt \"cd {shlex.quote(workdir)} && {shlex.quote(filename)} {' '.join(map(shlex.quote, args))}\""
     # print(cmd)
     exit(os.system(cmd) >> 8)
 
