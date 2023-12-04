@@ -206,6 +206,7 @@ configure () {
     ssh -p "${HOST_SSH_PORT}" "${SSH_USERNAME}@127.0.0.1" -t "docker --version && docker-compose --version && docker ps"
 
     echo "create docker commands on host..."
+    sudo mkdir -p /usr/local/bin
     cat << EOF | sudo tee /usr/local/bin/docker > /dev/null
 #!/usr/bin/env python3
 import sys
