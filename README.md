@@ -73,7 +73,7 @@ Now you're ready to create and configure the qemu instance.
 
 ## Create QEMU Instance
 
-First, download ubuntu server from the [offical download page](https://ubuntu.com/download/server/arm), and save the iso file to `Downloads` folder, you should download the LTS version (20.04 and 22.04 is tested).
+First, download ubuntu server from the [offical download page](https://ubuntu.com/download/server/arm), and save the iso file to `Downloads` folder, you should download the LTS version (22.04/24.04 is tested).
 
 Second, edit `setup.sh` and check the parameters on the top of the script, usually you don't have to modify them.
 
