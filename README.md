@@ -2,7 +2,7 @@
 
 **This repository is deprecated.**
 
-**Since MacOS 14.5 QEMU instance become unstable, it will randomly hang after boot. We tested 3 Macbooks (including M1/M3) the 14.4.1 with QEMU 8 is ok but 14.5 with QEMU 8 or QEMU9 having this randomly hang issue. It also reproducible on Lima's QEMU instance.**
+**Since MacOS 14.5 QEMU instance become unstable, it will randomly hang after boot. We tested 3 Macbooks (including M1/M3) the 14.4.1 with QEMU 8 is ok but 14.5 with QEMU 8 or QEMU 9 having this issue. It also reproducible on Lima's QEMU instance.**
 
 **We recommend migrate to Lima with `--vm-type==vz`, it use native virtualization support provided by macOS which works better than QEMU, and the file sharing protocol (virtio) support more file operations (like chmod) than sshfs on QEMU.**
 
